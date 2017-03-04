@@ -1,0 +1,1 @@
+/home/cuicb/work/rpi-kernel/xenomai-3/kernel/drivers/analogy/sensoray/s526.c

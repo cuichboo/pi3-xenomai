@@ -1,0 +1,1 @@
+/home/cuicb/work/rpi-kernel/xenomai-3/kernel/drivers/i2c/i2c-master.h
