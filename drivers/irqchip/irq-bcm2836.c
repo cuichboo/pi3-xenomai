@@ -114,6 +114,10 @@ static struct irq_chip bcm2836_arm_irqchip_timer = {
 	.name		= "bcm2836-timer",
 	.irq_mask	= bcm2836_arm_irqchip_mask_timer_irq,
 	.irq_unmask	= bcm2836_arm_irqchip_unmask_timer_irq,
+#ifdef CONFIG_IPIPE
+    .irq_hold = bcm2836_arm_irqchip_mask_timer_irq,
+    .irq_release = bcm2836_arm_irqchip_unmask_timer_irq,
+#endif
 };
 
 static void bcm2836_arm_irqchip_mask_pmu_irq(struct irq_data *d)
@@ -130,6 +134,10 @@ static struct irq_chip bcm2836_arm_irqchip_pmu = {
 	.name		= "bcm2836-pmu",
 	.irq_mask	= bcm2836_arm_irqchip_mask_pmu_irq,
 	.irq_unmask	= bcm2836_arm_irqchip_unmask_pmu_irq,
+#ifdef CONFIG_IPIPE
+    .irq_hold = bcm2836_arm_irqchip_mask_pmu_irq,
+    .irq_release = bcm2836_arm_irqchip_unmask_pmu_irq,
+#endif
 };
 
 static void bcm2836_arm_irqchip_mask_gpu_irq(struct irq_data *d)
@@ -144,6 +152,10 @@ static struct irq_chip bcm2836_arm_irqchip_gpu = {
 	.name		= "bcm2836-gpu",
 	.irq_mask	= bcm2836_arm_irqchip_mask_gpu_irq,
 	.irq_unmask	= bcm2836_arm_irqchip_unmask_gpu_irq,
+#ifdef CONFIG_IPIPE
+    .irq_hold = bcm2836_arm_irqchip_mask_gpu_irq,
+    .irq_release = bcm2836_arm_irqchip_unmask_gpu_irq,
+#endif
 };
 
 static void bcm2836_arm_irqchip_register_irq(int hwirq, struct irq_chip *chip)
@@ -171,12 +183,11 @@ __exception_irq_entry bcm2836_arm_irqchip_handle_irq(struct pt_regs *regs)
 
 		writel(1 << ipi, mailbox0);
 		dsb();
-		handle_IPI(ipi, regs);
+		ipipe_handle_multi_ipi(ipi, regs);
 #endif
 	} else if (stat) {
 		u32 hwirq = ffs(stat) - 1;
-
-		handle_IRQ(irq_linear_revmap(intc.domain, hwirq), regs);
+		ipipe_handle_multi_irq(irq_linear_revmap(intc.domain, hwirq), regs);
 	}
 }
 

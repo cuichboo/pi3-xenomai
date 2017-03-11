@@ -241,7 +241,7 @@ __irq_svc:
 #ifdef CONFIG_IPIPE
 __ipipe_fast_svc_irq_exit:
 #endif
-	svc_exit r5, irq = 1			@ return from exception
+    svc_exit r5, irq = 1			@ return from exception
  UNWIND(.fnend		)
 ENDPROC(__irq_svc)
 

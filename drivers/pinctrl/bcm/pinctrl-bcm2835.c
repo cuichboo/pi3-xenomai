@@ -43,6 +43,7 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/types.h>
+#include <linux/ipipe.h>
 
 #define MODULE_NAME "pinctrl-bcm2835"
 #define BCM2835_NUM_GPIOS 54
@@ -394,7 +395,7 @@ static int bcm2835_gpio_irq_handle_bank(struct bcm2835_pinctrl *pc,
 		gpio = (32 * bank) + offset;
 		type = pc->irq_type[gpio];
 
-		generic_handle_irq(irq_linear_revmap(pc->irq_domain, gpio));
+        ipipe_handle_demuxed_irq(irq_linear_revmap(pc->irq_domain, gpio));
 	}
 
 	return (events != 0);
@@ -625,6 +626,10 @@ static struct irq_chip bcm2835_gpio_irq_chip = {
 	.irq_ack = bcm2835_gpio_irq_ack,
 	.irq_mask = bcm2835_gpio_irq_disable,
 	.irq_unmask = bcm2835_gpio_irq_enable,
+#ifdef CONFIG_IPIPE
+    .irq_hold = bcm2835_gpio_irq_disable,
+    .irq_release = bcm2835_gpio_irq_enable,
+#endif
 };
 
 static int bcm2835_pctl_get_groups_count(struct pinctrl_dev *pctldev)
